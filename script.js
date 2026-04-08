@@ -228,24 +228,34 @@ function ajouterRegression(datasets, valeurs) {
 }
 
 function optionsCommunes(tousLesMois, yMin, yMax, stepSize, labelY, tooltipLabel) {
+  const surMobile = window.innerWidth < 768;
   return {
     responsive: true,
+    maintainAspectRatio: surMobile ? false : true,
     plugins: {
-      legend: { position: "top", labels: { generateLabels: legendeAvecLigne } },
+      legend: { position: "top", labels: { generateLabels: legendeAvecLigne, font: { size: surMobile ? 10 : 12 } } },
       tooltip: {
         callbacks: {
-          title: (items) => moisAffiches[items[0].dataIndex],
+          title: (items) => tousLesMois[items[0].dataIndex],
           label: tooltipLabel
         }
       }
     },
     scales: {
-      x: { title: { display: false }, ticks: { autoSkip: false, maxRotation: 90 } },
+      x: {
+        title: { display: false },
+        ticks: {
+          autoSkip: surMobile ? true : false,
+          maxRotation: 90,
+          maxTicksLimit: surMobile ? 6 : undefined,
+          font: { size: surMobile ? 9 : 11 }
+        }
+      },
       y: {
-        title: { display: true, text: labelY },
+        title: { display: true, text: labelY, font: { size: surMobile ? 9 : 11 } },
         min: yMin,
         max: yMax,
-        ticks: { stepSize }
+        ticks: { stepSize, font: { size: surMobile ? 9 : 11 } }
       }
     }
   };

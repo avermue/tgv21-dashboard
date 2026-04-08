@@ -290,4 +290,25 @@ canvas {
     padding: 12px;
   }
 
+/* Hauteur fixe pour les canvas sur mobile */
+  canvas {
+    height: 250px !important;
+  }
+
+  /* Sections graphiques sans padding excessif */
+  .graphique-section {
+    padding: 10px 8px;
+  }
+
+  /* Titres des graphiques plus petits */
+  .graphique-section h2 {
+    font-size: 0.95em;
+  }
+
+  /* Boutons de liaison plus compacts */
+  .boutons-liaison button {
+    padding: 5px 8px;
+    font-size: 0.8em;
+  }
+
 }
