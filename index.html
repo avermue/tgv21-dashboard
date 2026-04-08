@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ponctualité SNCF</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+
+    <header>
+      <h1>🚆 Tableau de bord – Ponctualité SNCF</h1>
+      <p>Données issues de l'API ouverte de la SNCF</p>
+    </header>
+
+<main>
+
+      <div id="mise-en-page">
+
+        <!-- Colonne gauche : sélection des années -->
+        <nav id="colonne-annees">
+          <h3>Année</h3>
+          <div id="boutons-annees"></div>
+        </nav>
+
+        <!-- Zone des graphiques -->
+        <div id="zone-graphiques">
+
+          <div id="conteneur-graphiques">
+
+            <section class="graphique-section">
+              <h2>Retard moyen à l'arrivée</h2>
+              <div class="boutons-liaison">
+                <button id="g1-besancon" class="actif-aller" onclick="changerLiaison(1, 'besancon')">Besançon → Paris</button>
+                <button id="g1-mulhouse" onclick="changerLiaison(1, 'mulhouse')">Mulhouse → Paris</button>
+                <button id="g1-toutes" onclick="changerLiaison(1, 'toutes')">Toutes liaisons</button>
+                <button class="btn-export" onclick="exporterGraphique('monGraphique', 'retard-moyen')">⬇ Exporter JPG</button>
+              </div>
+              <canvas id="monGraphique"></canvas>
+            </section>
+
+            <section class="graphique-section">
+              <h2>% de trains en retard à l'arrivée (/ trains prévus)</h2>
+              <div class="boutons-liaison">
+                <button id="g2-besancon" class="actif-aller" onclick="changerLiaison(2, 'besancon')">Besançon → Paris</button>
+                <button id="g2-mulhouse" onclick="changerLiaison(2, 'mulhouse')">Mulhouse → Paris</button>
+                <button id="g2-toutes" onclick="changerLiaison(2, 'toutes')">Toutes liaisons</button>
+                <button class="btn-export" onclick="exporterGraphique('monGraphique2', 'pct-trains-retard')">⬇ Exporter JPG</button>
+              </div>
+              <canvas id="monGraphique2"></canvas>
+            </section>
+
+          </div>
+
+          <div id="conteneur-graphiques-2">
+
+            <section class="graphique-section">
+              <h2>% retards légers < 15 min (/ trains prévus)</h2>
+              <div class="boutons-liaison">
+                <button id="g3-besancon" class="actif-aller" onclick="changerLiaison(3, 'besancon')">Besançon → Paris</button>
+                <button id="g3-mulhouse" onclick="changerLiaison(3, 'mulhouse')">Mulhouse → Paris</button>
+                <button id="g3-toutes" onclick="changerLiaison(3, 'toutes')">Toutes liaisons</button>
+                <button class="btn-export" onclick="exporterGraphique('monGraphique3', 'retards-30min')">⬇ Exporter JPG</button>
+              </div>
+              <canvas id="monGraphique3"></canvas>
+            </section>
+
+            <section class="graphique-section">
+              <h2>% retards graves > 60 min (/ trains prévus)</h2>
+              <div class="boutons-liaison">
+                <button id="g4-besancon" class="actif-aller" onclick="changerLiaison(4, 'besancon')">Besançon → Paris</button>
+                <button id="g4-mulhouse" onclick="changerLiaison(4, 'mulhouse')">Mulhouse → Paris</button>
+                <button id="g4-toutes" onclick="changerLiaison(4, 'toutes')">Toutes liaisons</button>
+                <button class="btn-export" onclick="exporterGraphique('monGraphique4', 'retards-60min')">⬇ Exporter JPG</button>
+              </div>
+              <canvas id="monGraphique4"></canvas>
+            </section>
+
+          </div>
+
+          <div id="chargement">Chargement des données...</div>
+          <div id="erreur" style="display:none; color:red;">
+            Impossible de charger les données.
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+
+  </body>
+</html>
