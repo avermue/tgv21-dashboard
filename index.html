@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ponctualité SNCF</title>
+    <title>TGV 21 – Ponctualité SNCF</title>
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
 
     <header>
-      <h1>🚆 Tableau de bord – Ponctualité SNCF</h1>
+      <h1>🚆 TGV 21 – Ponctualité SNCF</h1>
       <p>Données issues de l'API ouverte de la SNCF</p>
     </header>
 
@@ -43,7 +43,7 @@
             </section>
 
             <section class="graphique-section">
-              <h2>% de trains en retard à l'arrivée</h2>
+              <h2>% de trains en retard à l'arrivée (/ trains prévus)</h2>
               <div class="boutons-liaison">
                 <button id="g2-besancon" class="actif-aller" onclick="changerLiaison(2, 'besancon')">Besançon → Paris</button>
                 <button id="g2-mulhouse" onclick="changerLiaison(2, 'mulhouse')">Mulhouse → Paris</button>
@@ -60,12 +60,12 @@
           <div id="conteneur-graphiques-2">
 
             <section class="graphique-section">
-              <h2>% retards graves &gt; 30 min (/ trains prévus)</h2>
+              <h2>% retards légers &lt; 15 min (/ trains prévus)</h2>
               <div class="boutons-liaison">
                 <button id="g3-besancon" class="actif-aller" onclick="changerLiaison(3, 'besancon')">Besançon → Paris</button>
                 <button id="g3-mulhouse" onclick="changerLiaison(3, 'mulhouse')">Mulhouse → Paris</button>
                 <button id="g3-toutes" onclick="changerLiaison(3, 'toutes')">Toutes liaisons</button>
-                <button class="btn-export" onclick="exporterGraphique(3, 'retards-30min')" aria-label="Exporter le graphique en JPG">⬇ JPG</button>
+                <button class="btn-export" onclick="exporterGraphique(3, 'retards-moins-15min')" aria-label="Exporter le graphique en JPG">⬇ JPG</button>
               </div>
               <div class="canvas-wrapper">
                 <canvas id="monGraphique3"></canvas>
@@ -142,9 +142,10 @@
             <p>Pour une liaison : <code>nb_train_retard_arrivee / nb_train_prevu × 100</code>.<br>
             Pour « Toutes liaisons » : <code>Σ nb_train_retard_arrivee / Σ nb_train_prevu × 100</code> (moyenne pondérée par le volume de trafic).</p>
 
-            <h4>Graphique 3 — % retards &gt; 30 min</h4>
-            <p>Pour une liaison : <code>nb_train_retard_sup_30 / nb_train_prevu × 100</code>.<br>
-            Pour « Toutes liaisons » : <code>Σ nb_train_retard_sup_30 / Σ nb_train_prevu × 100</code>.</p>
+            <h4>Graphique 3 — % retards &lt; 15 min</h4>
+            <p>Représente la part de trains arrivés en retard mais avec un retard léger (moins de 15 minutes).<br>
+            Pour une liaison : <code>(nb_train_retard_arrivee − nb_train_retard_sup_15) / nb_train_prevu × 100</code>.<br>
+            Pour « Toutes liaisons » : <code>Σ (nb_train_retard_arrivee − nb_train_retard_sup_15) / Σ nb_train_prevu × 100</code>.</p>
 
             <h4>Graphique 4 — % retards &gt; 60 min</h4>
             <p>Pour une liaison : <code>nb_train_retard_sup_60 / nb_train_prevu × 100</code>.<br>
