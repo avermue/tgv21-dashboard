@@ -16,16 +16,14 @@
 
     <main>
 
-      <div id="mise-en-page">
+      <!-- Barre de sélection des années (au-dessus des graphiques) -->
+      <nav id="barre-annees" aria-label="Filtre par année">
+        <span class="label-annees">Années :</span>
+        <div id="boutons-annees"></div>
+      </nav>
 
-        <!-- Colonne gauche : sélection des années -->
-        <nav id="colonne-annees" aria-label="Filtre par année">
-          <h3>Année</h3>
-          <div id="boutons-annees"></div>
-        </nav>
-
-        <!-- Zone des graphiques -->
-        <div id="zone-graphiques">
+      <!-- Zone des graphiques -->
+      <div id="zone-graphiques">
 
           <div id="conteneur-graphiques">
 
@@ -73,12 +71,12 @@
             </section>
 
             <section class="graphique-section">
-              <h2>% retards graves &gt; 60 min (/ trains prévus)</h2>
+              <h2>% retards graves &gt; 30 min (/ trains prévus)</h2>
               <div class="boutons-liaison">
                 <button id="g4-besancon" class="actif-aller" onclick="changerLiaison(4, 'besancon')">Besançon → Paris</button>
                 <button id="g4-mulhouse" onclick="changerLiaison(4, 'mulhouse')">Mulhouse → Paris</button>
                 <button id="g4-toutes" onclick="changerLiaison(4, 'toutes')">Toutes liaisons</button>
-                <button class="btn-export" onclick="exporterGraphique(4, 'retards-60min')" aria-label="Exporter le graphique en JPG">⬇ JPG</button>
+                <button class="btn-export" onclick="exporterGraphique(4, 'retards-30min')" aria-label="Exporter le graphique en JPG">⬇ JPG</button>
               </div>
               <div class="canvas-wrapper">
                 <canvas id="monGraphique4"></canvas>
@@ -92,7 +90,6 @@
             Impossible de charger les données.
           </div>
 
-        </div>
       </div>
 
     </main>
@@ -147,9 +144,9 @@
             Pour une liaison : <code>(nb_train_retard_arrivee − nb_train_retard_sup_15) / nb_train_prevu × 100</code>.<br>
             Pour « Toutes liaisons » : <code>Σ (nb_train_retard_arrivee − nb_train_retard_sup_15) / Σ nb_train_prevu × 100</code>.</p>
 
-            <h4>Graphique 4 — % retards &gt; 60 min</h4>
-            <p>Pour une liaison : <code>nb_train_retard_sup_60 / nb_train_prevu × 100</code>.<br>
-            Pour « Toutes liaisons » : <code>Σ nb_train_retard_sup_60 / Σ nb_train_prevu × 100</code>.</p>
+            <h4>Graphique 4 — % retards &gt; 30 min</h4>
+            <p>Pour une liaison : <code>nb_train_retard_sup_30 / nb_train_prevu × 100</code>.<br>
+            Pour « Toutes liaisons » : <code>Σ nb_train_retard_sup_30 / Σ nb_train_prevu × 100</code>.</p>
 
             <h4>Droite de tendance</h4>
             <p>Régression linéaire par moindres carrés sur les valeurs disponibles. La droite n'est affichée que si le coefficient de détermination R² est supérieur ou égal à 0,10.</p>

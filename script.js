@@ -36,7 +36,9 @@ const CANVAS = {
 };
 
 let graphiques = { 1: null, 2: null, 3: null, 4: null };
-let anneeSelectionnee = "toutes";
+// Set d'années sélectionnées (ex: new Set(["2024", "2025"]))
+// Set vide = équivalent "toutes les années disponibles"
+let anneesSelectionnees = new Set();
 
 // Métadonnées extraites de l'API (alimentent le footer)
 let metaDonnees = {
@@ -172,12 +174,14 @@ function labelsAvecAnnee(tousLesMois) {
 }
 
 function filtrerMoisParAnnee(tousLesMois) {
-  if (anneeSelectionnee === "toutes") return tousLesMois;
-  return tousLesMois.filter(m => m.startsWith(anneeSelectionnee));
+  if (anneesSelectionnees.size === 0) return tousLesMois;
+  return tousLesMois.filter(m => anneesSelectionnees.has(m.substring(0, 4)));
 }
 
 function genererLabelsX(moisFiltres) {
-  if (anneeSelectionnee !== "toutes") return moisFiltres;
+  // Mode "année unique sélectionnée" : tous les labels visibles
+  if (anneesSelectionnees.size === 1) return moisFiltres;
+  // Mode multi-années ou toutes : seuls les janviers (et le 1er point)
   return labelsAvecAnnee(moisFiltres);
 }
 
@@ -492,25 +496,45 @@ async function chargerTout() {
 // GESTION DES ANNÉES
 // ============================================
 
-const ANNEES_PREVUES = ["toutes", "2022", "2023", "2024", "2025", "2026", "2027"];
+const ANNEES_PREVUES = ["2022", "2023", "2024", "2025", "2026", "2027"];
+
+// Liste des années réellement disponibles (calculée au chargement)
+let anneesDisponibles = [];
+
+function detecterAnneesDisponibles() {
+  const set = new Set();
+  Object.values(donnees).forEach(serie => {
+    if (serie) serie.forEach(r => set.add(r.date.substring(0, 4)));
+  });
+  anneesDisponibles = ANNEES_PREVUES.filter(a => set.has(a));
+}
 
 function construireBoutonsAnnees() {
-  const anneesDisponibles = new Set();
-  Object.values(donnees).forEach(serie => {
-    if (serie) serie.forEach(r => anneesDisponibles.add(r.date.substring(0, 4)));
-  });
+  detecterAnneesDisponibles();
+
+  // Par défaut : toutes les années disponibles sélectionnées
+  if (anneesSelectionnees.size === 0) {
+    anneesDisponibles.forEach(a => anneesSelectionnees.add(a));
+  }
 
   const conteneur = document.getElementById("boutons-annees");
   conteneur.innerHTML = "";
 
+  // Bouton "Toutes" en premier — raccourci pour cocher tout
+  const btnToutes = document.createElement("button");
+  btnToutes.textContent = "Toutes";
+  btnToutes.id = "btn-annee-toutes";
+  btnToutes.onclick = () => selectionnerToutes();
+  conteneur.appendChild(btnToutes);
+
+  // Une case par année
   ANNEES_PREVUES.forEach(annee => {
     const btn = document.createElement("button");
-    btn.textContent = annee === "toutes" ? "Toutes" : annee;
+    btn.textContent = annee;
     btn.id = `btn-annee-${annee}`;
 
-    if (annee === "toutes" || anneesDisponibles.has(annee)) {
-      btn.onclick = () => changerAnnee(annee);
-      if (annee === anneeSelectionnee) btn.classList.add("actif");
+    if (anneesDisponibles.includes(annee)) {
+      btn.onclick = () => basculerAnnee(annee);
     } else {
       btn.classList.add("grise");
       btn.disabled = true;
@@ -518,17 +542,45 @@ function construireBoutonsAnnees() {
 
     conteneur.appendChild(btn);
   });
+
+  rafraichirBoutonsAnnees();
 }
 
-function changerAnnee(annee) {
-  anneeSelectionnee = annee;
+// Bascule une année dans la sélection (toggle)
+function basculerAnnee(annee) {
+  if (anneesSelectionnees.has(annee)) {
+    // Empêcher la désélection si c'est la dernière cochée
+    if (anneesSelectionnees.size === 1) return;
+    anneesSelectionnees.delete(annee);
+  } else {
+    anneesSelectionnees.add(annee);
+  }
+  rafraichirBoutonsAnnees();
+  [1, 2, 3, 4].forEach(g => afficherGraphique(g));
+}
 
+// Raccourci : sélectionne toutes les années disponibles
+function selectionnerToutes() {
+  anneesSelectionnees = new Set(anneesDisponibles);
+  rafraichirBoutonsAnnees();
+  [1, 2, 3, 4].forEach(g => afficherGraphique(g));
+}
+
+// Met à jour l'apparence des boutons en fonction de la sélection
+function rafraichirBoutonsAnnees() {
   ANNEES_PREVUES.forEach(a => {
     const btn = document.getElementById(`btn-annee-${a}`);
-    if (btn && !btn.disabled) btn.classList.toggle("actif", a === annee);
+    if (btn && !btn.disabled) {
+      btn.classList.toggle("actif", anneesSelectionnees.has(a));
+    }
   });
-
-  [1, 2, 3, 4].forEach(g => afficherGraphique(g));
+  // Bouton "Toutes" actif si toutes les années dispo sont cochées
+  const btnToutes = document.getElementById("btn-annee-toutes");
+  if (btnToutes) {
+    const tout = anneesDisponibles.every(a => anneesSelectionnees.has(a))
+              && anneesSelectionnees.size === anneesDisponibles.length;
+    btnToutes.classList.toggle("actif", tout);
+  }
 }
 
 
@@ -652,7 +704,12 @@ function moyennePondereeRetard(moisAffiches, jeuxDeDonnees) {
 }
 
 // G2/G3/G4 : pourcentage à partir d'un compteur / nb_train_prevu
-function calculerValeursPourcentage(numG, moisAffiches, jeuxDeDonnees, champCompteur) {
+// extracteurCompteur peut être un nom de champ (string) OU une fonction (r) => nombre
+function calculerValeursPourcentage(numG, moisAffiches, jeuxDeDonnees, extracteurCompteur) {
+  const getCompteur = typeof extracteurCompteur === "function"
+    ? extracteurCompteur
+    : (r) => r[extracteurCompteur] || 0;
+
   if (etatGraphiques[numG].liaison === "toutes") {
     // Σ compteur / Σ trains prévus × 100
     return moisAffiches.map(mois => {
@@ -660,7 +717,7 @@ function calculerValeursPourcentage(numG, moisAffiches, jeuxDeDonnees, champComp
       jeuxDeDonnees.forEach(resultats => {
         const r = resultats.find(r => r.date.substring(0, 7) === mois);
         if (r && r.nb_train_prevu > 0) {
-          totalCompteur += (r[champCompteur] || 0);
+          totalCompteur += getCompteur(r);
           totalPrevu    += r.nb_train_prevu;
         }
       });
@@ -673,7 +730,7 @@ function calculerValeursPourcentage(numG, moisAffiches, jeuxDeDonnees, champComp
   return moisAffiches.map(mois => {
     const r = jeuxDeDonnees[0].find(r => r.date.substring(0, 7) === mois);
     if (!r || r.nb_train_prevu === 0) return null;
-    return Math.max(0, parseFloat(((r[champCompteur] / r.nb_train_prevu) * 100).toFixed(2)));
+    return Math.max(0, parseFloat(((getCompteur(r) / r.nb_train_prevu) * 100).toFixed(2)));
   });
 }
 
@@ -747,8 +804,28 @@ function afficherGraphique(numG) {
       break;
 
     case 3:
+      // % retards < 15 min = (retards totaux − retards ≥ 15 min) / trains prévus
       dessinerGraphique(3, {
-        calculerValeurs: (mois, jeux) => calculerValeursPourcentage(3, mois, jeux, "nb_train_retard_sup_30"),
+        calculerValeurs: (mois, jeux) => calculerValeursPourcentage(
+          3, mois, jeux,
+          r => Math.max(0, (r.nb_train_retard_arrivee || 0) - (r.nb_train_retard_sup_15 || 0))
+        ),
+        calculBrutPourMax: r => r.nb_train_prevu > 0
+          ? Math.max(0, ((r.nb_train_retard_arrivee - r.nb_train_retard_sup_15) / r.nb_train_prevu) * 100)
+          : null,
+        labelDataset: "% trains en retard < 15 min",
+        labelY: "% de trains prévus",
+        tooltip: (item) => {
+          if (item.parsed.y === null) return null;
+          if (item.datasetIndex === 0) return `Retard < 15 min : ${item.parsed.y} %`;
+          return `Tendance : ${item.parsed.y} %`;
+        }
+      });
+      break;
+
+    case 4:
+      dessinerGraphique(4, {
+        calculerValeurs: (mois, jeux) => calculerValeursPourcentage(4, mois, jeux, "nb_train_retard_sup_30"),
         calculBrutPourMax: r => r.nb_train_prevu > 0
           ? Math.max(0, (r.nb_train_retard_sup_30 / r.nb_train_prevu) * 100)
           : null,
@@ -757,22 +834,6 @@ function afficherGraphique(numG) {
         tooltip: (item) => {
           if (item.parsed.y === null) return null;
           if (item.datasetIndex === 0) return `Retard > 30 min : ${item.parsed.y} %`;
-          return `Tendance : ${item.parsed.y} %`;
-        }
-      });
-      break;
-
-    case 4:
-      dessinerGraphique(4, {
-        calculerValeurs: (mois, jeux) => calculerValeursPourcentage(4, mois, jeux, "nb_train_retard_sup_60"),
-        calculBrutPourMax: r => r.nb_train_prevu > 0
-          ? Math.max(0, (r.nb_train_retard_sup_60 / r.nb_train_prevu) * 100)
-          : null,
-        labelDataset: "% trains en retard > 60 min",
-        labelY: "% de trains prévus",
-        tooltip: (item) => {
-          if (item.parsed.y === null) return null;
-          if (item.datasetIndex === 0) return `Retard > 60 min : ${item.parsed.y} %`;
           return `Tendance : ${item.parsed.y} %`;
         }
       });

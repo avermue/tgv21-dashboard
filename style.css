@@ -64,15 +64,8 @@ main {
   padding: 0 20px;
 }
 
-#mise-en-page {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-}
-
 #zone-graphiques {
-  flex: 1;
-  min-width: 0;
+  width: 100%;
 }
 
 #conteneur-graphiques,
@@ -202,38 +195,38 @@ main {
 }
 
 /* ============================================
-   COLONNE DE SÉLECTION DES ANNÉES
+   BARRE DE SÉLECTION DES ANNÉES (au-dessus)
    ============================================ */
 
-#colonne-annees {
-  width: 120px;
-  flex-shrink: 0;
+#barre-annees {
   background: var(--blanc);
   border-radius: var(--rayon);
-  padding: 16px 12px;
+  padding: 12px 16px;
   box-shadow: var(--ombre-carte);
-  position: sticky;
-  top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-#colonne-annees h3 {
+.label-annees {
   color: var(--bleu-principal);
-  margin: 0 0 12px 0;
+  font-weight: 600;
   font-size: 0.95em;
-  text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 #boutons-annees {
   display: flex;
-  flex-direction: column;
   gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
 }
 
 #boutons-annees button {
-  width: 100%;
-  padding: 8px 6px;
+  padding: 7px 16px;
   border: 2px solid var(--bleu-principal);
   background: var(--blanc);
   color: var(--bleu-principal);
@@ -258,6 +251,22 @@ main {
   border-color: var(--gris-tres-clair);
   color: var(--gris-tres-clair);
   cursor: not-allowed;
+}
+
+/* Petite barre verticale pour séparer "Toutes" des années */
+#btn-annee-toutes {
+  margin-right: 6px;
+  position: relative;
+}
+
+#btn-annee-toutes::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: var(--gris-tres-clair);
 }
 
 /* ============================================
@@ -384,34 +393,28 @@ main {
     padding: 0 12px;
   }
 
-  /* Empile la colonne années au-dessus, en barre horizontale */
-  #mise-en-page {
-    flex-direction: column;
-    gap: 12px;
+  /* Barre années compacte sur mobile */
+  #barre-annees {
+    padding: 10px 12px;
+    gap: 10px;
+    margin-bottom: 14px;
   }
 
-  #colonne-annees {
+  .label-annees {
     width: 100%;
-    position: static;
-    padding: 12px;
-  }
-
-  #colonne-annees h3 {
-    margin-bottom: 8px;
+    text-align: center;
   }
 
   #boutons-annees {
-    flex-direction: row;
-    flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
   }
 
   #boutons-annees button {
-    width: auto;
-    flex: 1 1 70px;
-    min-width: 60px;
-    padding: 8px 10px;
+    padding: 6px 10px;
+    font-size: 0.85em;
+    flex: 1 1 60px;
+    min-width: 55px;
   }
 
   /* Empile les graphiques en une colonne */
@@ -473,11 +476,8 @@ main {
    ============================================ */
 
 @media print {
-  header, .boutons-liaison, #colonne-annees {
+  header, .boutons-liaison, #barre-annees {
     display: none;
-  }
-  #mise-en-page {
-    display: block;
   }
   .graphique-section {
     page-break-inside: avoid;
